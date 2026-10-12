@@ -61,17 +61,26 @@ def get_connection():
 
 
 
-def add_food(name, quantity, unit, category, expiry_date):
+
+def add_food(name, quantity, unit, category, expiry):
     connection = get_connection()
-        """INSERT INTO foods (name, quantity, unit, category, expiry_date, added_at)
-           VALUES (?, ?, ?, ?, ?, ?)""",
+    connection.execute(
+        """
+        INSERT INTO foods (
+            name, quantity, unit, category, expiry_date, added_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
         (
-            name.strip(), float(quantity), unit, category,
-            expiry_date.isoformat(),
+            name,
+            quantity,
+            unit,
+            category,
+            expiry.isoformat(),
             datetime.now(TZ).isoformat(timespec="seconds"),
         ),
     )
-    conn.commit()
+    connection.commit()
 
 
 def update_quantity(food_id, quantity):
