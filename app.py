@@ -35,8 +35,10 @@ st.set_page_config(
 # ---- Tampilan FreshTrack
 st.markdown("""
 <style>
-.stApp {
-    background-color: #F7FAF7;
+.stButton > button {
+    border-radius: 10px;
+    background-color: #287548;
+    color: white;
 }
 
 .block-container {
