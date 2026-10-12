@@ -99,7 +99,6 @@ section[data-testid="stSidebar"] {
 </style>
 """, unsafe_allow_html=True)
 
-}
 
 /* Angka pada kartu */
 [data-testid="stMetricValue"] {
