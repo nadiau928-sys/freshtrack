@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 import streamlit as st
 
-DB_PATH = Path(os.environ.get("FRESHTRACK_DB", "/content/freshtrack.db"))
+DB_PATH = Path(os.environ.get("FRESHTRACK_DB", "freshtrack.db"))
 TZ = ZoneInfo(os.environ.get("FRESHTRACK_TZ", "Asia/Jakarta"))
 SOON_DAYS = 3
 
@@ -36,10 +36,13 @@ def today() -> date:
     return datetime.now(TZ).date()
 
 
+
 @st.cache_resource
 def get_connection():
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    conn = sqlite3.connect(
+        str(DB_PATH),
+        check_same_thread=False
+    )
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS foods (
@@ -56,8 +59,6 @@ def get_connection():
     conn.commit()
     return conn
 
-
-conn = get_connection()
 
 
 def add_food(name, quantity, unit, category, expiry_date):
