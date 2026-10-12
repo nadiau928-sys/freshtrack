@@ -94,9 +94,15 @@ def update_quantity(selected_id, new_qty):
 
 
 
+
 def delete_food(food_id):
-    conn.execute("DELETE FROM foods WHERE id = ?", (int(food_id),))
-    conn.commit()
+    connection = get_connection()
+    connection.execute(
+        "DELETE FROM foods WHERE id = ?",
+        (int(food_id),),
+    )
+    connection.commit()
+
 
 
 def get_status(days: int) -> str:
