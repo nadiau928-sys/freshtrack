@@ -204,41 +204,93 @@ else:
         names = ", ".join(df.loc[df["sisa_hari"] < 0, "name"].tolist())
         st.error(f"Sudah lewat tanggal yang dicatat: {names}. Periksa kondisinya.")
 
+   
     # ---- Daftar persediaan
     st.markdown("### Daftar persediaan")
+
+    # Pastikan kolom perhitungan tersedia
+    df = df.copy()
+
+    if "sisa_hari" not in df.columns:
+        df["expiry_date"] = pd.to_datetime(
+            df["expiry_date"], errors="coerce"
+        ).dt.date
+
+        tanggal_hari_ini = today()
+
+        df["sisa_hari"] = df["expiry_date"].apply(
+            lambda tanggal: (tanggal - tanggal_hari_ini).days
+            if pd.notna(tanggal) else None
+        )
+
+    # Buat status berdasarkan sisa hari
+    if "status" not in df.columns:
+        def tentukan_status(hari):
+            if pd.isna(hari):
+                return "Tanggal tidak valid"
+            elif hari < 0:
+                return "Lewat tanggal"
+            elif hari == 0:
+                return "Batas hari ini"
+            elif hari <= SOON_DAYS:
+                return "Segera gunakan"
+            else:
+                return "Masih beberapa hari"
+
+        df["status"] = df["sisa_hari"].apply(tentukan_status)
+
+    # Filter dan pencarian
     f1, f2, f3 = st.columns([2, 1, 2])
+
     query = f1.text_input("Cari berdasarkan nama atau kategori")
     sort_label = f2.selectbox("Urutkan", list(SORT_OPTIONS))
     status_filter = f3.multiselect(
         "Filter status",
-        ["Lewat tanggal", "Batas hari ini", "Segera gunakan", "Masih beberapa hari"],
+        [
+            "Lewat tanggal",
+            "Batas hari ini",
+            "Segera gunakan",
+            "Masih beberapa hari",
+        ],
     )
 
     filtered = df.copy()
+
     if query.strip():
         q = query.strip()
         mask = (
-            filtered["name"].str.contains(q, case=False, na=False, regex=False)
-            | filtered["category"].str.contains(q, case=False, na=False, regex=False)
+            filtered["name"].str.contains(
+                q, case=False, na=False, regex=False
+            )
+            | filtered["category"].str.contains(
+                q, case=False, na=False, regex=False
+            )
         )
         filtered = filtered[mask]
+
     if status_filter:
         filtered = filtered[filtered["status"].isin(status_filter)]
 
     sort_col, ascending = SORT_OPTIONS[sort_label]
-    filtered = filtered.sort_values(sort_col, ascending=ascending, kind="stable")
+    filtered = filtered.sort_values(
+        sort_col, ascending=ascending, kind="stable"
+    )
 
     if filtered.empty:
         st.info("Tidak ada data yang cocok dengan pencarian/filter.")
     else:
         view = filtered[
-            ["id", "name", "quantity", "unit", "category",
-             "expiry_date", "sisa_hari", "status"]
+            [
+                "id", "name", "quantity", "unit", "category",
+                "expiry_date", "sisa_hari", "status",
+            ]
         ].copy()
+
         view.columns = [
             "ID", "Nama bahan", "Jumlah", "Satuan", "Kategori",
             "Tanggal", "Sisa hari", "Status",
         ]
+
         st.dataframe(
             view.style.apply(style_row, axis=1).format({"Jumlah": "{:g}"}),
             hide_index=True,
