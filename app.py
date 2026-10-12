@@ -98,7 +98,13 @@ def get_status(days: int) -> str:
 
 
 def load_foods() -> pd.DataFrame:
-    df = pd.read_sql_query("SELECT * FROM foods", conn)
+    connection = get_connection()
+    df = pd.read_sql_query(
+        "SELECT * FROM foods",
+        connection
+    )
+    return df
+
     if df.empty:
         return df
     df["expiry_date"] = pd.to_datetime(df["expiry_date"]).dt.date
