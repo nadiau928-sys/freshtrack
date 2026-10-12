@@ -106,20 +106,29 @@ def get_status(days: int) -> str:
     return "Masih beberapa hari"
 
 
-def load_foods() -> pd.DataFrame:
+
+def load_foods():
     connection = get_connection()
     df = pd.read_sql_query(
         "SELECT * FROM foods",
         connection
     )
-    return df
 
     if df.empty:
+        df["sisa_hari"] = pd.Series(dtype="int64")
         return df
-    df["expiry_date"] = pd.to_datetime(df["expiry_date"]).dt.date
-    t = today()
-    df["sisa_hari"] = df["expiry_date"].apply(lambda d: (d - t).days)
-    df["status"] = df["sisa_hari"].apply(get_status)
+
+    df["expiry_date"] = pd.to_datetime(
+        df["expiry_date"], errors="coerce"
+    ).dt.date
+
+    current_date = today()
+
+    df["sisa_hari"] = df["expiry_date"].apply(
+        lambda expiry: (expiry - current_date).days
+        if pd.notna(expiry) else None
+    )
+
     return df
 
 
