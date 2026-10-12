@@ -83,12 +83,15 @@ def add_food(name, quantity, unit, category, expiry):
     connection.commit()
 
 
-def update_quantity(food_id, quantity):
-    conn.execute(
+
+def update_quantity(selected_id, new_qty):
+    connection = get_connection()
+    connection.execute(
         "UPDATE foods SET quantity = ? WHERE id = ?",
-        (float(quantity), int(food_id)),
+        (new_qty, selected_id),
     )
-    conn.commit()
+    connection.commit()
+
 
 
 def delete_food(food_id):
