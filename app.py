@@ -62,7 +62,7 @@ def get_connection():
 
 
 def add_food(name, quantity, unit, category, expiry_date):
-    conn.execute(
+    connection = get_connection()
         """INSERT INTO foods (name, quantity, unit, category, expiry_date, added_at)
            VALUES (?, ?, ?, ?, ?, ?)""",
         (
