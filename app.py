@@ -189,7 +189,8 @@ def get_connection():
 
 
 
-def add_food(name, quantity, unit, category, expiry):
+
+def add_food(name, quantity, unit, category, expiry_date):
     connection = get_connection()
     connection.execute(
         """
@@ -203,11 +204,12 @@ def add_food(name, quantity, unit, category, expiry):
             quantity,
             unit,
             category,
-            expiry.isoformat(),
+            expiry_date.isoformat(),
             datetime.now(TZ).isoformat(timespec="seconds"),
         ),
     )
     connection.commit()
+
 
 
 
